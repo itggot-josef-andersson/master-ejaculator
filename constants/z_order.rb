@@ -1,0 +1,3 @@
+module ZOrder
+  BACKGROUND, ITEM, PROJECTILE, PARTICLE, PLAYER, GUI = *0..5
+end
