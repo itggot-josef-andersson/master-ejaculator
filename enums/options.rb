@@ -4,7 +4,7 @@ class Options
   GAME_WIDTH   = 1280 #640 #
   GAME_HEIGHT  = 720 #480 #
   GAME_TITLE   = 'Master Ejaculator!'
-  GAME_VERSION = '2.2.0'
+  GAME_VERSION = '2.3.0'
 
   ### Player settings
   PLAYER_DEFAULT_SCALE     = 0.2
