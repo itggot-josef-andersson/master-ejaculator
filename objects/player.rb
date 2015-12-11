@@ -1,107 +1,80 @@
 require 'gosu'
-require_relative './game_object'
-require_relative '../constants/z_order'
-require_relative '../constants/constants'
+require_relative 'alive'
+require_relative '../handlers/game_handler'
+require_relative '../enums/options'
+require_relative '../enums/z_order'
 require_relative '../j_tools'
 
-class Player < GameObject
+class Player < Alive
 
-  SPIN_ACCELERATION = 0.85
-  SPIN_DECELERATION = 0.8
-  MOVE_ACCELERATION = 0.375
-  MOVE_DECELERATION = 0.95
-  WIDTH = 32
-  HEIGHT = 32
+  attr_accessor :ammo, :next_shot,
+                :accelerating, :sprite,
+                :move_acceleration_multiplier, :spin_acceleration_multiplier, :scale_multiplier
 
-  attr_accessor :ammo, :next_shot, :accelerating, :health, :sprite
+  def initialize(type:)
+    super(type:type, max_health:Options::PLAYER_MAX_HEALTH)
 
-  def initialize(type)
-    super(type:type)
-    @next_shot = 0
-    @health
-    @ammo
-    @accelerating = false
+    @animation_frames = GameHandler.get_instance.get_sprite(sprite_id:SpriteID::THRUST)
+    if    type == ObjectType::PLAYER1 then @sprite = GameHandler.get_instance.get_sprite(sprite_id:SpriteID::PLAYER1)
+    elsif type == ObjectType::PLAYER2 then @sprite = GameHandler.get_instance.get_sprite(sprite_id:SpriteID::PLAYER2) end
 
-    @animation_frames = Gosu::Image::load_tiles('./resources/thrust.png', 16, 16)
-
-    if type == ObjectType::PLAYER1
-      @sprite = Gosu::Image.new('./resources/player1.png')
-    elsif type == ObjectType::PLAYER2
-      @sprite = Gosu::Image.new('./resources/player2.png')
-    else
-      @sprite = Gosu::Image.new('./resources/error.png')
-    end
+    @width  = @sprite.width
+    @height = @sprite.height
   end
 
-  def left
-    @vel_spin -= SPIN_ACCELERATION
-  end
+  ### Give ammo to the player
+  def give_ammo(ammo:) @ammo = JTools::clam(@ammo + ammo, 0, 100) end
 
-  def right
-    @vel_spin += SPIN_ACCELERATION
-  end
+  ### Spin the player right or left
+  def left()  @vel_spin -= Options::PLAYER_SPIN_ACCELERATION end
+  def right() @vel_spin += Options::PLAYER_SPIN_ACCELERATION end
 
   def forward
-    @vel_x += Gosu::offset_x(@angle, MOVE_ACCELERATION)
-    @vel_y += Gosu::offset_y(@angle, MOVE_ACCELERATION)
+    @vel_x += Gosu::offset_x(@angle, current_acceleration)
+    @vel_y += Gosu::offset_y(@angle, current_acceleration)
     @accelerating = true
   end
 
   def backward
-    @vel_x -= Gosu::offset_x(@angle, MOVE_ACCELERATION / 2.5)
-    @vel_y -= Gosu::offset_y(@angle, MOVE_ACCELERATION / 2.5)
+    @vel_x -= Gosu::offset_x(@angle, current_acceleration / 2.5)
+    @vel_y -= Gosu::offset_y(@angle, current_acceleration / 2.5)
   end
 
-  def hit(damage)
-    @health -= damage
-    puts "Player #{@type + 1} lost #{damage} health"
-    if @health <= 0
-      puts "Player #{type + 1} died"
-    end
-  end
-
-  def dead
-    @health <= 0
-  end
+  ### After multipliers are applied
+  def current_scale()             Options::PLAYER_DEFAULT_SCALE * scale_multiplier                                 end
+  def current_acceleration()      Options::PLAYER_ACCELERATION * move_acceleration_multiplier                      end
+  def current_deceleration()      current_acceleration * 2.5                                                        end
+  def current_spin_acceleration() Options::PLAYER_SPIN_ACCELERATION * spin_acceleration_multiplier                 end
+  def current_spin_deceleration() current_spin_acceleration * 0.955                                                 end
+  def current_hit_radius()        Math.sqrt((@width / 2 * current_scale) ** 2 + (@height / 2 * current_scale) ** 2) end
 
   def update
-    @x += @vel_x
-    @y += @vel_y
-    @angle += @vel_spin
+    ### Move and rotate
+    @x += @vel_x; @y += @vel_y; @angle += @vel_spin
 
-    @x %= Constants::GAME_WIDTH
-    @y %= Constants::GAME_HEIGHT
+    ### Jump to the other side of the screen if outside the screen
+    @x %= Options::GAME_WIDTH; @y %= Options::GAME_HEIGHT
 
-    @vel_spin *= SPIN_DECELERATION
-    @vel_x *= MOVE_DECELERATION
-    @vel_y *= MOVE_DECELERATION
+    ### Decelerate movement and rotation
+    @vel_spin *= current_spin_deceleration
+    @vel_x    *= current_deceleration
+    @vel_y    *= current_deceleration
+  end
 
-    @ammo += 0.2
-    @ammo = JTools::clam(@ammo, 0, 100)
+  ### Draws a ship and it's components at position
+  def draw_ship(x:@x, y:@y, angle:@angle)
+    @sprite.draw_rot(x, y, ZOrder::PLAYER, angle - 45, 0.5, 0.5, current_scale, current_scale)
+    @animation_frame.draw_rot(x, y, ZOrder::PARTICLE, angle, 0.5, -3.5 * current_scale, current_scale, current_scale) if @accelerating
   end
 
   def draw
     @animation_frame = @animation_frames[Gosu::milliseconds / 100 % @animation_frames.size]
 
-    @sprite.draw_rot(@x, @y, ZOrder::PLAYER, @angle - 45)
-    @animation_frame.draw_rot(@x, @y, ZOrder::PARTICLE, @angle, 0.5, -0.5) if @accelerating
-
-    if @x < 23
-      @sprite.draw_rot(@x + Constants::GAME_WIDTH, @y, ZOrder::PLAYER, @angle - 45)
-      @animation_frame.draw_rot(@x + Constants::GAME_WIDTH, @y, ZOrder::PARTICLE, @angle, 0.5, -0.5) if @accelerating
-    end
-    if @x > Constants::GAME_WIDTH - 23
-      @sprite.draw_rot(@x - Constants::GAME_WIDTH, @y, ZOrder::PLAYER, @angle - 45)
-      @animation_frame.draw_rot(@x - Constants::GAME_WIDTH, @y, ZOrder::PARTICLE, @angle, 0.5, -0.5) if @accelerating
-    end
-    if @y < 23
-      @sprite.draw_rot(@x, @y + Constants::GAME_HEIGHT, ZOrder::PLAYER, @angle - 45)
-      @animation_frame.draw_rot(@x, @y + Constants::GAME_HEIGHT, ZOrder::PARTICLE, @angle, 0.5, -0.5) if @accelerating
-    end
-    if @y > Constants::GAME_HEIGHT - 23
-      @sprite.draw_rot(@x, @y - Constants::GAME_HEIGHT, ZOrder::PLAYER, @angle - 45)
-      @animation_frame.draw_rot(@x, @y - Constants::GAME_HEIGHT, ZOrder::PARTICLE, @angle, 0.5, -0.5) if @accelerating
-    end
+    draw_ship
+    draw_ship(x:@x + Options::GAME_WIDTH) if @x < 23
+    draw_ship(x:@x - Options::GAME_WIDTH) if @x > Options::GAME_WIDTH - 23
+    draw_ship(y:@y + Options::GAME_HEIGHT) if @y < 23
+    draw_ship(y:@y - Options::GAME_HEIGHT) if @y > Options::GAME_HEIGHT - 23
   end
 
 end

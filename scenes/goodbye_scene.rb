@@ -1,7 +1,7 @@
 require 'gosu'
 require_relative './scene'
-require_relative '../constants/constants'
-require_relative '../constants/z_order'
+require_relative '../enums/options'
+require_relative '../enums/z_order'
 
 class GoodbyeScene < Scene
 
@@ -9,8 +9,8 @@ class GoodbyeScene < Scene
     @font = Gosu::Font.new(41)
   end
 
-  def enter(last_scene)
-    @close_on = Time.now.to_f + 2
+  def enter(last_scene:)
+    @close_on = Time.now.to_f + 1.5
   end
 
   def update
@@ -18,7 +18,7 @@ class GoodbyeScene < Scene
   end
 
   def draw
-    @font.draw_rel('Thanks for playing!', Constants::GAME_WIDTH / 2, Constants::GAME_HEIGHT / 2, ZOrder::GUI, 0.5, 0.5, 1, 1, Gosu::Color::GREEN)
+    @font.draw_rel('Thanks for playing!', Options::GAME_WIDTH / 2, Options::GAME_HEIGHT / 2, ZOrder::GUI, 0.5, 0.5, 1, 1, Gosu::Color::GREEN)
   end
 
 end

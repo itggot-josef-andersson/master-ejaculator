@@ -13,24 +13,19 @@ class GameObject
     @angle = angle
   end
 
-  def set_pos(x:0, y:0)
-    @x, @y = x, y
+  ### Multi-value setters
+  def set_pos(x:0, y:0)                          @x, @y                    = x, y                   end
+  def set_velocity(vel_x:0, vel_y:0, vel_spin:0) @vel_x, @vel_y, @vel_spin = vel_x, vel_y, vel_spin end
+
+  ### Move and rotate object by velocity
+  def move
+    @x    += @vel_x
+    @y    += @vel_y
+    @spin += @vel_spin
   end
 
-  def set_velocity(vel_x:0, vel_y:0, vel_spin:0)
-    @vel_x, @vel_y, @vel_spin = vel_x, vel_y, vel_spin
-  end
-
-  ### Used for projectiles and items
-  ### -returning true will generally remove the object
-  def should_be_removed
-    false
-  end
-
-  def update
-  end
-
-  def draw
-  end
+  ### Returning true from update will generally remove the object
+  def update() end
+  def draw() end
 
 end

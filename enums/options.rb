@@ -1,0 +1,48 @@
+class Options
+
+  ### Game settings
+  GAME_WIDTH   = 1280 #640 #
+  GAME_HEIGHT  = 720 #480 #
+  GAME_TITLE   = 'Master Ejaculator!'
+  GAME_VERSION = '2.2.0'
+
+  ### Player settings
+  PLAYER_DEFAULT_SCALE     = 0.2
+  PLAYER_AIR_RESISTANCE    = 0.95
+  PLAYER_ACCELERATION      = 0.375
+  PLAYER_SPIN_ACCELERATION = 0.85
+
+  PLAYER_MAX_HEALTH    = 200
+  PLAYER_START_HEALTH  = 100
+  PLAYER_START_AMMO    = 100 #100 is max (not theoretically) because we are simulating percentage
+  PLAYER_AMMO_PER_TICK = 0.2
+
+  # [x,y,angle]
+  PLAYER1_START_POSITION = [GAME_WIDTH / 4, GAME_HEIGHT / 2, -90]
+  PLAYER2_START_POSITION = [GAME_WIDTH / 4 * 3, GAME_HEIGHT / 2, 90]
+
+  ### How much ammo % things consume
+  NORMAL_JIZZ_PRICE  = 8
+  NORMAL_JIZZ_DAMAGE = 10
+  NORMAL_JIZZ_SPEED  = 15
+  NORMAL_JIZZ_SCALE  = 0.1 #0.125
+  HUGE_JIZZ_PRICE    = 100
+  HUGE_JIZZ_DAMAGE   = 50
+  HUGE_JIZZ_SPEED    = 15
+  HUGE_JIZZ_SCALE    = 0.4
+  SHOOTING_DELAY     = 0.2
+
+  ### Collectible settings
+  COLLECTIBLE_DESTROY_TIMER = 10
+  COLLECTIBLE_WIDTH  = 24
+  COLLECTIBLE_HEIGHT = 24
+  COLLECTIBLE_SCALE  = 0.15 # 0.1825
+
+  HEALTH_BONUS_HEAL_AMOUNT  = 25
+  AMMO_BONUS_AMOUNT         = 100
+
+  ### Power ups settings
+  SUPER_SPEED_TIME       = 4
+  SUPER_SPEED_MULTIPLIER = 1.05
+
+end

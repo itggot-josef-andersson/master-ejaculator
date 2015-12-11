@@ -1,5 +1,3 @@
-require_relative './constants/constants'
-
 class JTools
 
   def self.clam(numb, min, max)

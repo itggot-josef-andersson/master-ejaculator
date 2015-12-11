@@ -1,12 +1,11 @@
 class Scene
 
-  attr_accessor :enabled
-
   def initialize
   end
 
   ### Called when scenes is loaded for the first time
-  def enter(last_scene)
+  ### last_scene is the ID of the previous scene
+  def enter(last_scene:)
   end
 
   ### Called when current scenes is being closed and another one opened
@@ -14,7 +13,7 @@ class Scene
   end
 
   ### Update method for scenes
-  ### Returns ScreenID if wanting to switch scenes
+  ### Return a ScreenID if wanting to switch scenes
   def update
   end
 
